@@ -1,1 +1,1 @@
-./build/receiver_node ../config.json
+./build/receiver_node config.json

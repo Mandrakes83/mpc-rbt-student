@@ -18,7 +18,10 @@ public:
     config(senderConfig),
     timer_period(config.sendingPeriodMillis)
   {
-    UNIMPLEMENTED(__PRETTY_FUNCTION__);
+   	create();
+ 	configure();
+  	bind();
+  	callback = std::bind(&Sender::Node::onDataTimerTick, this, data); 
   }
 
   void run();
