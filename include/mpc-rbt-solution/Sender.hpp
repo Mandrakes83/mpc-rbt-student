@@ -21,7 +21,7 @@ public:
    	create();
  	configure();
   	bind();
-  	callback = std::bind(&Sender::Node::onDataTimerTick, this, data); 
+  	callback = [this] { onDataTimerTick(); }; 
   }
 
   void run();

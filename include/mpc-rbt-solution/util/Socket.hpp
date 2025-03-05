@@ -15,7 +15,7 @@ static constexpr uint16_t MAX_FRAME_MTU = 1500;
 
 struct IPFrame
 {
-  uint16_t port = 0;
+  uint16_t port = 220;
   std::string address{};
   std::array<uint8_t, MAX_FRAME_MTU> serializedData{};
   ssize_t dataSize = 0;

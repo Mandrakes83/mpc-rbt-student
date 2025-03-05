@@ -23,7 +23,8 @@ void Sender::Node::onDataTimerTick()
     .port = config.remotePort,
     .address = config.remoteAddress,
   };
-  Utils::serialize(frame.address.c_str(),data);
+  Utils::Message::serialize(frame,data);
+  send(frame);
   RCLCPP_INFO(logger, "Sending data to host: '%s:%d'", frame.address.c_str(), frame.port);
   RCLCPP_INFO(logger, "\n\tstamp: %ld", data.timestamp);
 }
