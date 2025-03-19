@@ -163,7 +163,7 @@ private:
         timer4_ = this->create_wall_timer(std::chrono::duration_cast<std::chrono::milliseconds>(period), std::bind(&TestNode::timer_4_callback, this));
     }
 
-    uint8_t currentStep_ = 0;
+    uint8_t currentStep_ = 3;
 
     rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr subscription0_;
     rclcpp::Subscription<sensor_msgs::msg::Range>::SharedPtr subscription1_;
