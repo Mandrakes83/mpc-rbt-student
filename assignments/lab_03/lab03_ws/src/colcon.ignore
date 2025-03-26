@@ -1,0 +1,2 @@
+echo "helpmegod" >> colcon.ignore
+echo "lab_test_pkg" >> colcon.ignore
