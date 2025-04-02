@@ -14,8 +14,8 @@ using namespace std::chrono_literals;
 
 KeyboardControlNode::KeyboardControlNode(): rclcpp::Node("keyboard_control_node") {
 
-  	twist_publisher_ = this->create_publisher<geometry_msgs::msg::Twist>("cmd_vel", 10);
-    timer_ = this->create_wall_timer(100ms, std::bind(&KeyboardControlNode::timerCallback, this));
+  	twist_publisher_ = this->create_publisher<geometry_msgs::msg::Twist>("cmd_vel", 1);
+    timer_ = this->create_wall_timer(10ms, std::bind(&KeyboardControlNode::timerCallback, this));
 
     // Set terminal settings to non-blocking
     tcgetattr(STDIN_FILENO, &old_termios_);
