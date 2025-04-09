@@ -55,8 +55,9 @@ void LocalizationNode::updateOdometry(double left_wheel_vel, double right_wheel_
     // ********
     
     double linear =  (left_wheel_vel*robot_config::WHEEL_RADIUS + right_wheel_vel*robot_config::WHEEL_RADIUS)/2.0;
-    double angular = (right_wheel_vel*robot_config::WHEEL_RADIUS-left_wheel_vel*robot_config::WHEEL_RADIUS)/(robot_config::HALF_DISTANCE_BETWEEN_WHEELS*2.0);  
+    double angular = -(right_wheel_vel*robot_config::WHEEL_RADIUS-left_wheel_vel*robot_config::WHEEL_RADIUS)/(robot_config::HALF_DISTANCE_BETWEEN_WHEELS*2.0);  
 
+    
     tf2::Quaternion tf_quat;
     tf2::fromMsg(odometry_.pose.pose.orientation, tf_quat);
     double roll, pitch, theta;
