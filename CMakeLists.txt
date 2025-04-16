@@ -26,7 +26,7 @@ set(dependencies rclcpp geometry_msgs mpc_rbt_simulator nav_msgs)
 #  ament_lint_auto_find_test_dependencies()
 #endif()
 
-add_library(${PROJECT_NAME} SHARED src/KeyboardControl.cpp src/Localization.cpp)
+add_library(${PROJECT_NAME} SHARED src/KeyboardControl.cpp src/Localization.cpp src/Planning.cpp)
 ament_target_dependencies(${PROJECT_NAME} ${dependencies})
 install(TARGETS ${PROJECT_NAME} ARCHIVE DESTINATION lib LIBRARY DESTINATION lib RUNTIME DESTINATION lib)
 
@@ -38,6 +38,10 @@ add_executable(localization src/localization_node.cpp)
 target_link_libraries(localization ${PROJECT_NAME})
 install(TARGETS localization DESTINATION lib/${PROJECT_NAME})
 install(DIRECTORY launch rviz DESTINATION share/${PROJECT_NAME})
+
+add_executable(planning src/planning_node.cpp)
+target_link_libraries(planning ${PROJECT_NAME})
+install(TARGETS planning DESTINATION lib/${PROJECT_NAME})
 
 
 ament_export_include_directories(include)
