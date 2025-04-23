@@ -32,6 +32,12 @@ bool operator==(const Cell &a, const Cell &b)
 {
     return (a.x == b.x) && (a.y == b.y);
 }
+bool operator==(const std::shared_ptr<Cell>& lhs, const std::shared_ptr<Cell>& rhs) {
+    if (!lhs || !rhs) {
+        return false; // Handle null pointers
+    }
+    return (lhs->x == rhs->x) && (lhs->y == rhs->y); // Compare the underlying Cell objects
+}
 
 class PlanningNode : public rclcpp::Node {
 public:

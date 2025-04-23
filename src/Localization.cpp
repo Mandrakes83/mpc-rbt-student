@@ -8,6 +8,13 @@ LocalizationNode::LocalizationNode() :
     last_time_(this->get_clock()->now()) {
 
     // Odometry message initialization
+    odometry_.pose.pose.position.x = -0.5;
+    odometry_.pose.pose.position.y = 0;
+    odometry_.pose.pose.position.z = 0;
+    odometry_.pose.pose.orientation.x = 0;
+    odometry_.pose.pose.orientation.y = 0;
+    odometry_.pose.pose.orientation.z = 0;
+    odometry_.pose.pose.orientation.w = 1;
     odometry_.header.frame_id = "map";
     odometry_.child_frame_id = "base_link";
     //add code here
