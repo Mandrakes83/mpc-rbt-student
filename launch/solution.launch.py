@@ -34,7 +34,7 @@ def generate_launch_description():
         ),
         
         TimerAction(
-            period=10.0,
+            period=15.0,
             actions=[
                 # Launch your node
                 Node(
@@ -43,8 +43,35 @@ def generate_launch_description():
                     name='localization',
                     output='screen'
                     #parameters=[{'use_sim_time': True}]
-                )               
+                )            
 
-                ]
-        )   
-    ])
+            ]
+        ),
+
+        TimerAction(
+            period=16.0,
+            actions=[
+                Node(
+                    package='student_dan_pkg',
+                    executable='planning',
+                    name='planning',
+                    output='screen'
+                )   
+            
+            ]
+        ),
+
+        TimerAction(
+            period=16.0,
+            actions=[
+                Node(
+                    package='student_dan_pkg',
+                    executable='motioncontrol',
+                    name='motioncontrol',
+                    output='screen'
+                )
+            ]
+        )  
+    ]
+    )
+

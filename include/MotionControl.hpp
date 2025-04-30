@@ -23,10 +23,12 @@ class MotionControlNode : public rclcpp::Node {
     private:
         // Parameters
         // TO DO
+        std::atomic<bool> collision_detected_{false};
+        
 
         // Methods
         void checkCollision();
-        void updateTwist();
+        void updateTwist(const geometry_msgs::msg::Pose &target_pose);
         void execute();
             
         // Callbacks

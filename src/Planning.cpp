@@ -71,7 +71,7 @@ void PlanningNode::dilateMap() {
     int height = map_.info.height;
     //float resolution = map_.info.resolution;
 
-    int dilation_radius = 5; // půl metru v buňkách
+    int dilation_radius = 6; // půl metru v buňkách
 
     auto isInBounds = [width, height](int x, int y) {
         return x >= 0 && x < width && y >= 0 && y < height;
@@ -134,7 +134,8 @@ void PlanningNode::aStar(const geometry_msgs::msg::PoseStamped &start, const geo
 
     int dirX[] = {1, 1, 0, -1, -1, -1, 0, 1};
     int dirY[] = {0, 1, 1,  1,  0, -1,-1,-1};
-    float cost[] = {1,0.6,1,0.6,1,0.6,1,0.6};
+    float tmp = sqrt(2);
+    float cost[] = {1,tmp,1,tmp,1,tmp,1,tmp};
 
     while(!openList.empty())
     {
@@ -167,7 +168,7 @@ void PlanningNode::aStar(const geometry_msgs::msg::PoseStamped &start, const geo
             if (xNew < map_.info.width && yNew < map_.info.width)
             {
                 //RCLCPP_INFO(get_logger(),"Inside of map!");
-                if (map_.data[yNew*map_.info.width + xNew] < 50 && closedList[yNew*map_.info.width + xNew] == false)
+                if (map_.data[yNew*map_.info.width + xNew] < 50 && closedList.at(yNew*map_.info.width + xNew) == false)
                 {
                     //RCLCPP_INFO(get_logger(),"Nepozeram na stenu!");
                     
@@ -208,7 +209,7 @@ void PlanningNode::aStar(const geometry_msgs::msg::PoseStamped &start, const geo
             }
         
         }
-        closedList[current->y*map_.info.width + current->x] = true;
+        closedList.at(current->y*map_.info.width + current->x) = true;
         openList.erase(openList.begin());
     }
 

@@ -17,29 +17,33 @@ struct Cell {
     std::shared_ptr<Cell> parent;
 
     Cell(int c, int r);
-
-    /*
-    bool operator==(const Cell& other) const
-    {
-        return x == other.x && y == other.y;
-    }
-        */
 };
 
 bool operator<(const Cell &a, const Cell &b)
 {
     return a.f < b.f;
 }
+
+bool operator<(const std::shared_ptr<Cell>& a, const std::shared_ptr<Cell>& b) 
+{
+    if(a->f < b->f)
+        return true;
+    else
+        return false;
+}
+
 bool operator==(const Cell &a, const Cell &b)
 {
     return (a.x == b.x) && (a.y == b.y);
 }
-bool operator==(const std::shared_ptr<Cell>& lhs, const std::shared_ptr<Cell>& rhs) {
+bool operator==(const std::shared_ptr<Cell>& lhs, const std::shared_ptr<Cell>& rhs) 
+{
     if (!lhs || !rhs) {
         return false; // Handle null pointers
     }
     return (lhs->x == rhs->x) && (lhs->y == rhs->y); // Compare the underlying Cell objects
 }
+
 
 class PlanningNode : public rclcpp::Node {
 public:
@@ -71,5 +75,6 @@ private:
     nav_msgs::msg::OccupancyGrid map_;
     nav_msgs::msg::Path path_;
 };
+
 
 #endif // PLANNING_HPP
