@@ -128,7 +128,18 @@ void PlanningNode::aStar(const geometry_msgs::msg::PoseStamped &start, const geo
                 {
                     //RCLCPP_INFO(get_logger(),"Nepozeram na stenu!");
                     auto it = std::find(openList.begin(),openList.end(),std::make_shared<Cell>(NewCell));
-                    
+                    /*
+                    for(auto i = 0; i < openList.size(); ++i)
+                    {
+                        uint32_t xVar = openList.at(i); //TODO: fetch the data
+                        uint32_t yVar = openList.at(i); //TODO: fetch the data
+
+                        if(xVar == xNew && yVar == yNew)
+                        {
+                            
+                        }
+                    }
+                    */
                     if (openList.end() != it)
                     {
                         if(it->get()->parent.get()->g > current.get()->g)
