@@ -23,7 +23,7 @@ PlanningNode::PlanningNode() :
         // Request map
         auto request = std::make_shared<nav_msgs::srv::GetMap::Request>();
         auto request_map = map_client_->async_send_request(request,std::bind(&PlanningNode::mapCallback,this,std::placeholders::_1));
-        
+
         RCLCPP_INFO(get_logger(), "Trying to fetch map...");
     }
 
@@ -34,6 +34,8 @@ void PlanningNode::mapCallback(rclcpp::Client<nav_msgs::srv::GetMap>::SharedFutu
     {
         map_ = response->map;
         RCLCPP_INFO(get_logger(), "I GOT A JAR OF MAP!");
+        dilateMap();
+        RCLCPP_INFO(get_logger(),"AND NOW ITS BIGGER!");
     }
     
 }
@@ -62,8 +64,50 @@ void PlanningNode::dilateMap() {
     /*
     nav_msgs::msg::OccupancyGrid dilatedMap = map_;
     ... processing ...
-    map_ = dilatedMap;
+    
     */
+    nav_msgs::msg::OccupancyGrid dilatedMap = map_;
+    int width = map_.info.width;
+    int height = map_.info.height;
+    //float resolution = map_.info.resolution;
+
+    int dilation_radius = 5; // půl metru v buňkách
+
+    auto isInBounds = [width, height](int x, int y) {
+        return x >= 0 && x < width && y >= 0 && y < height;
+    };
+
+    // Vytvoříme kopii mapy pro čtení (aby se úpravy neprojevily při průchodu)
+    std::vector<int8_t> originalData = map_.data;
+
+    for (int y = 0; y < height; ++y) 
+    {
+        for (int x = 0; x < width; ++x) 
+        {
+            int index = y * width + x;
+
+            // Pokud je buňka překážka
+            if (originalData[index] > 50) 
+            {
+                // Dilatuj okolí této buňky
+                for (int dy = -dilation_radius; dy <= dilation_radius; ++dy) 
+                {
+                    for (int dx = -dilation_radius; dx <= dilation_radius; ++dx) 
+                    {
+                        int nx = x + dx;
+                        int ny = y + dy;
+
+                        if (!isInBounds(nx, ny)) continue;
+
+                        // Můžeš sem dát i podmínku na vzdálenost (např. kruhová dilatace)
+                        
+                        map_.data[ny * width + nx] = 100; // nastav jako překážku
+                        
+                    }
+                }
+            }
+        }
+    }
 }
 
 void PlanningNode::aStar(const geometry_msgs::msg::PoseStamped &start, const geometry_msgs::msg::PoseStamped &goal) {
@@ -74,8 +118,6 @@ void PlanningNode::aStar(const geometry_msgs::msg::PoseStamped &start, const geo
     // ********
 
     float resolution = map_.info.resolution;
-    float origin_x = map_.info.origin.position.x;
-    float origin_y = map_.info.origin.position.y;
     
     Cell cStart((start.pose.position.x+7.1)/resolution,(start.pose.position.y+3.6)/resolution);
     Cell cGoal((goal.pose.position.x+7.1)/resolution,(goal.pose.position.y+3.6)/resolution);
@@ -90,10 +132,9 @@ void PlanningNode::aStar(const geometry_msgs::msg::PoseStamped &start, const geo
 
     std::shared_ptr<Cell> goalCell = nullptr;
 
-    //int dirX[] = {1, 1, 0, -1, -1, -1, 0, 1};
-    //int dirY[] = {0, 1, 1,  1,  0, -1,-1,-1};
-    int dirX[] = {1,0,-1,0};
-    int dirY[] = {0,1,0,-1};
+    int dirX[] = {1, 1, 0, -1, -1, -1, 0, 1};
+    int dirY[] = {0, 1, 1,  1,  0, -1,-1,-1};
+    float cost[] = {1,0.6,1,0.6,1,0.6,1,0.6};
 
     while(!openList.empty())
     {
@@ -113,11 +154,12 @@ void PlanningNode::aStar(const geometry_msgs::msg::PoseStamped &start, const geo
         }
         
         
-        for (int i = 0; i<4; i++) //vsetky mozne cesty
+        for (int i = 0; i<8; i++) //vsetky mozne cesty
         {
             uint32_t xNew = current->x + dirX[i];
             uint32_t yNew = current->y + dirY[i];
             bool found = false;
+            size_t index_found = 0;
             Cell NewCell(xNew,yNew);
             NewCell.x = xNew;
             NewCell.y = yNew;
@@ -128,55 +170,39 @@ void PlanningNode::aStar(const geometry_msgs::msg::PoseStamped &start, const geo
                 if (map_.data[yNew*map_.info.width + xNew] < 50 && closedList[yNew*map_.info.width + xNew] == false)
                 {
                     //RCLCPP_INFO(get_logger(),"Nepozeram na stenu!");
-                    auto it = std::find(openList.begin(),openList.end(),std::make_shared<Cell>(NewCell));
-                    /*
-                    for(auto i = 0; i < openList.size(); ++i)
-                    {
-                        uint32_t xVar = openList.at(i); //TODO: fetch the data
-                        uint32_t yVar = openList.at(i); //TODO: fetch the data
-                        
-                            
-                        if(NewCell == openList.at(i)->get())
+                    
+                    for(size_t o = 0; o < openList.size(); ++o)
+                    { 
+                        if(NewCell == *(openList.at(o).get()))
                         {
                             found = true;
+                            index_found = o;
+                            break;
                         }
+
                     }
                     if(found)
                     {
-                     //TODO: WRITE THIS
-                    }
-                    else
-                    {
-                        NewCell.g = current->g + 1;
-                        NewCell.h = std::sqrt(((current->x - NewCell.x)^2) + ((current->y - NewCell.y)^2));
-                        NewCell.f = NewCell.g + NewCell.h;
-                        NewCell.parent = current;
-                        openList.push_back(std::make_shared<Cell>(NewCell));
-                        //RCLCPP_INFO(get_logger(),"New created!");
-                    }
-                    */
-    
-                    
-                    if (openList.end() != it)
-                    {
-                        if(it->get()->parent.get()->g > current.get()->g)
+                        auto foundCell = *(openList.at(index_found).get());
+                        if ((foundCell.parent)->g > (current->g + cost[i]))
                         {
-                            it->get()->g = current->g + 1;
-                            it->get()->f = it->get()->g + it->get()->h;
-                            it->get()->parent = current;
+                            foundCell.g = current->g + cost[i];
+                            foundCell.f = foundCell.g + foundCell.h;
+                            foundCell.parent = current;
+                            
                         }
-                        
                         //RCLCPP_INFO(get_logger(),"Old visited!");
                     }
                     else
                     {
-                        NewCell.g = current->g + 1;
+                        NewCell.g = current->g + cost[i];
                         NewCell.h = std::sqrt(((current->x - NewCell.x)^2) + ((current->y - NewCell.y)^2));
                         NewCell.f = NewCell.g + NewCell.h;
                         NewCell.parent = current;
                         openList.push_back(std::make_shared<Cell>(NewCell));
                         //RCLCPP_INFO(get_logger(),"New created!");
                     }
+                
                     
                 }
             }
@@ -229,8 +255,8 @@ void PlanningNode::smoothPath() {
         int count = 0;
 
         for (int j = -window; j <= window; ++j) {
-            int idx = i + j;
-            if (idx >= 0 && idx < path_.poses.size()) {
+            size_t idx = i + j;
+            if (idx != 0 && idx < path_.poses.size()) {
                 sum_x += path_.poses[idx].pose.position.x;
                 sum_y += path_.poses[idx].pose.position.y;
                 count++;

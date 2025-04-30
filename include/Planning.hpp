@@ -18,10 +18,12 @@ struct Cell {
 
     Cell(int c, int r);
 
+    /*
     bool operator==(const Cell& other) const
     {
         return x == other.x && y == other.y;
     }
+        */
 };
 
 bool operator<(const Cell &a, const Cell &b)
