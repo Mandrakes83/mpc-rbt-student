@@ -117,6 +117,7 @@ void PlanningNode::aStar(const geometry_msgs::msg::PoseStamped &start, const geo
         {
             uint32_t xNew = current->x + dirX[i];
             uint32_t yNew = current->y + dirY[i];
+            bool found = false;
             Cell NewCell(xNew,yNew);
             NewCell.x = xNew;
             NewCell.y = yNew;
@@ -133,13 +134,29 @@ void PlanningNode::aStar(const geometry_msgs::msg::PoseStamped &start, const geo
                     {
                         uint32_t xVar = openList.at(i); //TODO: fetch the data
                         uint32_t yVar = openList.at(i); //TODO: fetch the data
-
-                        if(xVar == xNew && yVar == yNew)
-                        {
+                        
                             
+                        if(NewCell == openList.at(i)->get())
+                        {
+                            found = true;
                         }
                     }
+                    if(found)
+                    {
+                     //TODO: WRITE THIS
+                    }
+                    else
+                    {
+                        NewCell.g = current->g + 1;
+                        NewCell.h = std::sqrt(((current->x - NewCell.x)^2) + ((current->y - NewCell.y)^2));
+                        NewCell.f = NewCell.g + NewCell.h;
+                        NewCell.parent = current;
+                        openList.push_back(std::make_shared<Cell>(NewCell));
+                        //RCLCPP_INFO(get_logger(),"New created!");
+                    }
                     */
+    
+                    
                     if (openList.end() != it)
                     {
                         if(it->get()->parent.get()->g > current.get()->g)
